@@ -1,0 +1,26 @@
+#root {
+  min-height: 100dvh;
+  background: radial-gradient(circle at 20% 20%, rgba(255, 90, 102, 0.14), transparent 30%),
+              radial-gradient(circle at 80% 0%, rgba(52, 92, 255, 0.08), transparent 32%),
+              var(--bg);
+}
+
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--bg);
+}
+
+.app-shell {
+  width: min(100%, 520px);
+  margin: 0 auto;
+  min-height: 100dvh;
+  background: #050505;
+  color: #f5f5f5;
+  border-radius: 24px;
+  box-shadow: 0 20px 80px rgba(0,0,0,0.35);
+  position: relative;
+  overflow: hidden;
+  padding-top: env(safe-area-inset-top, 0px);
+}

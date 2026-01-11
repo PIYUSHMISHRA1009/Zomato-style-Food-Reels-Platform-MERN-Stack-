@@ -1,0 +1,95 @@
+:root {
+  color-scheme: light dark;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica,
+    Arial, "Apple Color Emoji", "Segoe UI Emoji";
+
+  --bg: #fafafa;
+  --color-bg: #050505;
+  --surface: #ffffff;
+  --surface-2: #f6f7f9;
+
+  --text: #111827;
+  --muted: #6b7280;
+
+  --border: #e5e7eb;
+
+  --color-accent: #b96a63;
+  --color-accent-hover: #a15852;
+
+  --primary: #e23744;
+  --primary-hover: #cf2f3b;
+  --primary-contrast: #ffffff;
+
+  --danger: #dc2626;
+
+  --ring: rgba(226, 55, 68, 0.35);
+
+  --shadow: 0 10px 30px rgba(17, 24, 39, 0.08);
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.35);
+
+  --radius: 16px;
+
+  --transition-base: 180ms ease;
+
+  --space-1: 6px;
+  --space-2: 10px;
+  --space-3: 14px;
+  --space-4: 18px;
+  --space-5: 24px;
+
+  --container: 420px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b0f14;
+    --color-bg: #050505;
+    --surface: #101723;
+    --surface-2: #0d141f;
+
+    --text: #f3f4f6;
+    --muted: #9ca3af;
+
+    --border: #223047;
+
+    --color-accent: #c97870;
+    --color-accent-hover: #b06760;
+
+    --primary: #ff5a66;
+    --primary-hover: #ff4653;
+    --primary-contrast: #0b0f14;
+
+    --danger: #f87171;
+
+    --ring: rgba(255, 90, 102, 0.35);
+
+    --shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+    --shadow-md: 0 12px 36px rgba(0, 0, 0, 0.5);
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
