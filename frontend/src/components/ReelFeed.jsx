@@ -3,14 +3,51 @@ import { Link } from 'react-router-dom'
 
 // Reusable feed for vertical reels
 // Props:
-// - items: Array of video items { _id, video, description, likeCount, savesCount, commentsCount, comments, foodPartner }
+// - items: Array of video items
 // - onLike: (item) => void | Promise<void>
 // - onSave: (item) => void | Promise<void>
 // - emptyMessage: string
 // - loading: boolean
 // - activeTab: 'home' | 'saved'
-const ReelFeed = ({ items = [], onLike, onSave, emptyMessage = 'No videos yet.', loading = false, activeTab = 'home' }) => {
+
+const ReelFeed = ({
+  items = [],
+  onLike,
+  onSave,
+  emptyMessage = 'No videos yet.',
+  loading = false,
+  activeTab = 'home'
+}) => {
+  // Existing ref: stores video DOM elements
   const videoRefs = useRef(new Map())
+
+  // NEW: stores watch start time per video (foodId -> timestamp)
+  const watchStartTimeRef = useRef(new Map())
+
+  /**
+   * Send watch-duration event to backend
+   * This is a SIDE EFFECT only — it must never break UI
+   */
+  const logWatchEvent = async (foodId, seconds) => {
+    if (seconds < 1) return // ignore accidental/very short views
+
+    try {
+      await fetch('/api/events/watch', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          foodId,
+          value: seconds
+        })
+      })
+    } catch (err) {
+      // Silent fail — UX must never break
+      console.error('Watch event failed')
+    }
+  }
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -18,9 +55,27 @@ const ReelFeed = ({ items = [], onLike, onSave, emptyMessage = 'No videos yet.',
         entries.forEach((entry) => {
           const video = entry.target
           if (!(video instanceof HTMLVideoElement)) return
+
+          const foodId = video.dataset.foodid
+
           if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
-            video.play().catch(() => { /* ignore autoplay errors */ })
+            // START watch timer when reel becomes active
+            watchStartTimeRef.current.set(foodId, Date.now())
+            video.play().catch(() => {
+              /* ignore autoplay errors */
+            })
           } else {
+            // STOP watch timer when reel leaves viewport
+            const startTime = watchStartTimeRef.current.get(foodId)
+
+            if (startTime) {
+              const watchedSeconds =
+                (Date.now() - startTime) / 1000
+
+              watchStartTimeRef.current.delete(foodId)
+              logWatchEvent(foodId, watchedSeconds)
+            }
+
             video.pause()
           }
         })
@@ -33,29 +88,50 @@ const ReelFeed = ({ items = [], onLike, onSave, emptyMessage = 'No videos yet.',
   }, [items])
 
   const setVideoRef = (id) => (el) => {
-    if (!el) { videoRefs.current.delete(id); return }
+    if (!el) {
+      videoRefs.current.delete(id)
+      return
+    }
     videoRefs.current.set(id, el)
   }
 
   return (
     <div className="reels-page">
       <div className="reels-feed" role="list">
+        {/* Skeleton loader */}
         {loading && (
-          <div className="empty-state">
-            <p>Loading...</p>
+          <div className="reel-skeleton">
+            <div className="skeleton-video"></div>
+            <div className="skeleton-content">
+              <div className="skeleton-line skeleton-title"></div>
+              <div className="skeleton-line skeleton-text"></div>
+              <div className="skeleton-line skeleton-text-short"></div>
+            </div>
+            <div className="skeleton-actions">
+              <div className="skeleton-action"></div>
+              <div className="skeleton-action"></div>
+              <div className="skeleton-action"></div>
+            </div>
           </div>
         )}
 
+        {/* Empty state */}
         {!loading && items.length === 0 && (
           <div className="empty-state">
-            <p>{emptyMessage}</p>
+            <div className="empty-icon">📱</div>
+            <p className="empty-title">{emptyMessage}</p>
+            <p className="empty-subtitle">
+              Check back later for new content
+            </p>
           </div>
         )}
 
         {items.map((item) => (
           <section key={item._id} className="reel" role="listitem">
+            {/* VIDEO ELEMENT (UNCHANGED visually) */}
             <video
               ref={setVideoRef(item._id)}
+              data-foodid={item._id} // NEW: used for watch tracking
               className="reel-video"
               src={item.video}
               muted
@@ -65,34 +141,53 @@ const ReelFeed = ({ items = [], onLike, onSave, emptyMessage = 'No videos yet.',
             />
 
             <div className="reel-overlay">
-              <div className="reel-overlay-gradient" aria-hidden="true" />
-              <div className="reel-label">Video</div>
+              <div
+                className="reel-overlay-gradient"
+                aria-hidden="true"
+              />
+
+              {/* AI badge (visual only) */}
+              <div className="reel-badge">
+                <span className="badge-icon">✨</span>
+                <span className="badge-text">Recommended</span>
+              </div>
+
+              {/* Action buttons */}
               <div className="reel-actions">
                 <div className="reel-action-group">
                   <button
-                    onClick={onLike ? () => onLike(item) : undefined}
+                    onClick={
+                      onLike ? () => onLike(item) : undefined
+                    }
                     className="reel-action"
                     aria-label="Like"
                   >
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 22l7.8-8.6 1-1a5.5 5.5 0 0 0 0-7.8z" />
-                    </svg>
+                    ❤️
                   </button>
-                  <div className="reel-action__count">{item.likeCount ?? item.likesCount ?? item.likes ?? 0}</div>
+                  <div className="reel-action__count">
+                    {item.likeCount ??
+                      item.likesCount ??
+                      item.likes ??
+                      0}
+                  </div>
                 </div>
 
                 <div className="reel-action-group">
                   <button
                     className="reel-action"
-                    onClick={onSave ? () => onSave(item) : undefined}
+                    onClick={
+                      onSave ? () => onSave(item) : undefined
+                    }
                     aria-label="Bookmark"
-                    data-active={item.saved ? 'true' : undefined}
                   >
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z" />
-                    </svg>
+                    🔖
                   </button>
-                  <div className="reel-action__count">{item.savesCount ?? item.bookmarks ?? item.saves ?? 0}</div>
+                  <div className="reel-action__count">
+                    {item.savesCount ??
+                      item.bookmarks ??
+                      item.saves ??
+                      0}
+                  </div>
                 </div>
 
                 <div className="reel-action-group">
@@ -105,31 +200,61 @@ const ReelFeed = ({ items = [], onLike, onSave, emptyMessage = 'No videos yet.',
                 </div>
               </div>
 
+              {/* Content */}
               <div className="reel-content">
-                <p className="reel-description" title={item.description}>{item.description}</p>
+                <h2 className="reel-title">
+                  {item.name ||
+                    item.foodName ||
+                    'Delicious Food'}
+                </h2>
+
                 {item.foodPartner && (
-                  <Link className="reel-btn" to={"/food-partner/" + item.foodPartner} aria-label="Visit store">Visit store</Link>
+                  <div className="reel-partner-info">
+                    👨‍🍳 by Partner
+                  </div>
+                )}
+
+                <p
+                  className="reel-description"
+                  title={item.description}
+                >
+                  {item.description}
+                </p>
+
+                {item.foodPartner && (
+                  <Link
+                    className="reel-btn"
+                    to={'/food-partner/' + item.foodPartner}
+                  >
+                    Visit Store →
+                  </Link>
                 )}
               </div>
 
-              <nav className="reel-bottom-nav" aria-label="Primary">
-                <Link className={`reel-nav-item ${activeTab === 'home' ? 'is-active' : ''}`} to="/">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M3 9.5 12 3l9 6.5V21a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-5a3 3 0 0 0-3-3 3 3 0 0 0-3 3v5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1Z" />
-                  </svg>
-                  <span>home</span>
-                </Link>
-                <Link className={`reel-nav-item ${activeTab === 'saved' ? 'is-active' : ''}`} to="/saved">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z" />
-                  </svg>
-                  <span>saved</span>
-                </Link>
-              </nav>
+              {/* Bottom navigation moved outside each reel */}
             </div>
           </section>
         ))}
       </div>
+      {/* Single fixed bottom navigation */}
+      <nav className="reel-bottom-nav">
+        <Link
+          className={`reel-nav-item ${
+            activeTab === 'home' ? 'is-active' : ''
+          }`}
+          to="/"
+        >
+          Home
+        </Link>
+        <Link
+          className={`reel-nav-item ${
+            activeTab === 'saved' ? 'is-active' : ''
+          }`}
+          to="/saved"
+        >
+          Saved
+        </Link>
+      </nav>
     </div>
   )
 }

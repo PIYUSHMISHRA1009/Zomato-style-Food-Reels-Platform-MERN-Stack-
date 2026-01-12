@@ -1,6 +1,6 @@
-const express = require('express');
-const foodPartnerController = require('../controllers/foodpartner.controller');
-const authMiddleware = require('../middlewares/auth.middleware');
+import express from 'express';
+import foodPartnerController from '../controllers/foodpartner.controller.js';
+import authMiddleware from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
@@ -17,4 +17,4 @@ router.get(
     foodPartnerController.getPartnerStore
 );
 
-module.exports = router;
+export default router;

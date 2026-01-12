@@ -1,8 +1,8 @@
-const foodModel = require('../models/food.model');
-const storageService = require('../services/storage.service');
-const { v4: uuid } = require("uuid");
-const likeModel=require("../models/likes.model")
-const saveModel=require("../models/save.model")
+import foodModel from '../models/food.model.js';
+import storageService from '../services/storage.service.js';
+import { v4 as uuid } from 'uuid';
+import likeModel from '../models/likes.model.js';
+import saveModel from '../models/save.model.js';
 
 async function createFood(req, res) {
     const fileUploadResult = await storageService.uploadFile(
@@ -124,7 +124,7 @@ async function getSaveFood(req, res) {
 }
 
 
-module.exports = {
+export default {
     createFood,
     getFoodItems,
     likeFood,

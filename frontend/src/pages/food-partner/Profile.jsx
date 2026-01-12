@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
 import '../../styles/profile.css'
+import useTabCloseLogout from '../../hooks/useTabCloseLogout.js'
+import { logoutFoodPartner } from '../../services/auth.js'
 
 const Profile = () => {
     const { id: partnerId } = useParams();
@@ -60,6 +62,9 @@ const Profile = () => {
     const initials = partner?.name?.trim()?.[0]?.toUpperCase() || 'F';
     const isOwnProfile = !partnerId;
 
+    // Tab-close logout disabled - causes issues with SPA navigation
+    // useTabCloseLogout('foodPartner', isOwnProfile)
+
     return (
         <div className="fp-store-page">
             {loading && <div className="fp-loading">Loading profile…</div>}
@@ -81,6 +86,17 @@ const Profile = () => {
                                         {partner?.phone && <span>{partner.phone}</span>}
                                         {partner?.email && <span>{partner.email}</span>}
                                     </div>
+                                    {isOwnProfile && (
+                                        <button
+                                            className="fp-cta ghost"
+                                            onClick={async () => {
+                                                await logoutFoodPartner()
+                                                window.location.replace('/food-partner/login')
+                                            }}
+                                        >
+                                            Logout
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 

@@ -1,5 +1,5 @@
-const foodModel = require('../models/food.model');
-const foodPartnerModel = require('../models/foodpartner.model');
+import foodModel from '../models/food.model.js';
+import foodPartnerModel from '../models/foodpartner.model.js';
 
 function formatPartner(partnerDoc){
     if(!partnerDoc) return null;
@@ -66,7 +66,7 @@ async function getPartnerStore(req,res){
     }
 }
 
-module.exports = {
+export default {
     getMyStore,
     getPartnerStore
 };

@@ -81,6 +81,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0; /* allow text to shrink/wrap in flex row */
 }
 
 .fp-kicker { text-transform: uppercase; letter-spacing: 1px; font-size: 11px; color: var(--fp-muted); }
@@ -154,6 +155,11 @@
 .fp-card-body { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
 .fp-card-title { font-weight: 700; font-size: 16px; }
 .fp-card-desc { color: var(--fp-muted); font-size: 13px; line-height: 1.4; }
+
+/* Prevent long text breaking layout */
+.fp-card-title, .fp-card-desc {
+  word-break: break-word;
+}
 
 .fp-card-actions { display: flex; justify-content: space-between; align-items: center; }
 .fp-card-link { color: var(--fp-accent-2); font-weight: 700; text-decoration: none; }

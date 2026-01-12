@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../../styles/create-food.css";
+import useTabCloseLogout from '../../hooks/useTabCloseLogout.js'
+import { logoutFoodPartner } from '../../services/auth.js'
 
 const MAX_SIZE_MB = 40;
 const MAX_DURATION_SECONDS = 90;
@@ -22,6 +24,9 @@ const CreateFood = () => {
     const [videoPreview, setVideoPreview] = useState("");
     const [status, setStatus] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Tab-close logout disabled - causes issues with SPA navigation
+    // useTabCloseLogout('foodPartner', true)
 
     useEffect(() => {
         return () => {
@@ -103,7 +108,7 @@ const CreateFood = () => {
             if (videoPreview) URL.revokeObjectURL(videoPreview);
             setVideoFile(null);
             setVideoPreview("");
-            navigate("/");
+            navigate("/food-partner/profile");
         } catch (error) {
             setStatus(error.response?.data?.message || "Upload failed. Please try again.");
         } finally {
@@ -129,9 +134,21 @@ const CreateFood = () => {
                             Keep it concise for mobile guests.
                         </p>
                     </div>
-                    <div className="cf-hero-pill">
-                        <span className="cf-pill-dot" />
-                        Ready for vertical video
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                        <div className="cf-hero-pill">
+                            <span className="cf-pill-dot" />
+                            Ready for vertical video
+                        </div>
+                        <button
+                            type="button"
+                            className="cf-secondary"
+                            onClick={async () => {
+                                await logoutFoodPartner()
+                                window.location.replace('/food-partner/login')
+                            }}
+                        >
+                            Logout
+                        </button>
                     </div>
                 </header>
 

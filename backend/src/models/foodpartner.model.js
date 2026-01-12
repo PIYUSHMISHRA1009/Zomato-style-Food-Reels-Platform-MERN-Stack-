@@ -1,4 +1,4 @@
-const mongoose=require('mongoose');
+import mongoose from 'mongoose';
 
 const foodPartnerSchema= new mongoose.Schema({
     name:{
@@ -32,4 +32,4 @@ const foodPartnerSchema= new mongoose.Schema({
 
 const foodPartnerModel= mongoose.model("foodpartner",foodPartnerSchema);
 
-module.exports=foodPartnerModel;
+export default foodPartnerModel;

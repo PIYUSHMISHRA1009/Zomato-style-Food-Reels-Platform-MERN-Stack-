@@ -2,10 +2,15 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import '../../styles/reels.css'
 import ReelFeed from '../../components/ReelFeed.jsx'
+import useTabCloseLogout from '../../hooks/useTabCloseLogout.js'
+import { logoutUser } from '../../services/auth.js'
 
 const Saved = () => {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
+
+  // Tab-close logout disabled - causes issues with SPA navigation
+  // useTabCloseLogout('user', true)
 
   useEffect(() => {
     axios
@@ -70,14 +75,26 @@ const Saved = () => {
   }
 
   return (
-    <ReelFeed
-      items={items}
-      loading={loading}
-      activeTab="saved"
-      onLike={handleLike}
-      onSave={handleSave}
-      emptyMessage="Nothing saved yet."
-    />
+    <>
+      <div style={{ padding: '12px', display: 'flex', justifyContent: 'flex-end' }}>
+        <button
+          onClick={async () => {
+            await logoutUser()
+            window.location.replace('/user/login')
+          }}
+        >
+          Logout
+        </button>
+      </div>
+      <ReelFeed
+        items={items}
+        loading={loading}
+        activeTab="saved"
+        onLike={handleLike}
+        onSave={handleSave}
+        emptyMessage="Nothing saved yet."
+      />
+    </>
   )
 }
 

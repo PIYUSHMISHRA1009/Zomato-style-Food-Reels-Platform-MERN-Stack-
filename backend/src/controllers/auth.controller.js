@@ -1,7 +1,7 @@
-const userModel = require("../models/user.model")
-const foodPartnerModel=require("../models/foodpartner.model")
-const bcrypt = require('bcryptjs');
-const jwt=require('jsonwebtoken');
+import userModel from '../models/user.model.js';
+import foodPartnerModel from '../models/foodpartner.model.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 async function registerUser(req,res){
     const { fullName,email,password} =req.body;
@@ -20,11 +20,17 @@ async function registerUser(req,res){
         email,
         password: hashedPassword
     })
-    const token=jwt.sign({
-        id:user._id,
-
-    },process.env.JWT_SECRET)
-    res.cookie("token",token)
+    const token = jwt.sign(
+        { id: user._id },
+        process.env.JWT_SECRET,
+        { expiresIn: '7d' }
+    )
+    res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000
+    })
     res.status(201).json({
         message:"User registered successfully",
         user:{
@@ -54,11 +60,18 @@ async function loginUser(req,res){
         })
     }
 
-    const token=jwt.sign({
-        id:user._id,
-    }, process.env.JWT_SECRET)
+    const token = jwt.sign(
+        { id: user._id },
+        process.env.JWT_SECRET,
+        { expiresIn: '7d' }
+    )
 
-    res.cookie("token",token)
+    res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000
+    })
     res.status(200).json({
         message:"User logged in successfully",
         user:{
@@ -96,9 +109,15 @@ async function registerFoodPartner(req,res){
     })
      const token = jwt.sign(
         { id: foodPartner._id, role: "foodPartner" },
-        process.env.JWT_SECRET
+        process.env.JWT_SECRET,
+        { expiresIn: '7d' }
     );
-    res.cookie("token",token)
+    res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000
+    })
     
     res.status(201).json({
         message:"Food Partner Registered Successfully",
@@ -128,11 +147,18 @@ async function loginFoodPartner(req,res){
             message:"Invalid email or password"
         })
     }
-    const token=jwt.sign({
-        id:foodPartner._id,
-    }, process.env.JWT_SECRET)
+    const token = jwt.sign(
+        { id: foodPartner._id },
+        process.env.JWT_SECRET,
+        { expiresIn: '7d' }
+    )
     
-    res.cookie("token",token)
+    res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000
+    })
 
     res.status(200).json({
         message:"Food Partner logged in successfully",
@@ -149,7 +175,7 @@ function logoutFoodPartner(req,res){
         message:"Food Partner logged out successfully"
     });
 }
-module.exports={
+export default {
     registerUser,
     loginUser,
     logoutUser,

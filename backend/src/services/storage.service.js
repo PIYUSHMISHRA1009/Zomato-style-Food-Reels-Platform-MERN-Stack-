@@ -1,15 +1,29 @@
 //The services whose behaviour or source can change over time there code goes into service.js file
 
-const ImageKit = require("imagekit");
+import ImageKit from 'imagekit';
 
-const imagekit = new ImageKit({
-  publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
-  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
-  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT
-});
+// Lazy initialization - only create ImageKit instance when needed
+let imagekit = null;
+
+function getImageKit() {
+  if (!imagekit) {
+    // Check if required env vars exist
+    if (!process.env.IMAGEKIT_PUBLIC_KEY || !process.env.IMAGEKIT_PRIVATE_KEY || !process.env.IMAGEKIT_URL_ENDPOINT) {
+      throw new Error('ImageKit environment variables are not configured. Please set IMAGEKIT_PUBLIC_KEY, IMAGEKIT_PRIVATE_KEY, and IMAGEKIT_URL_ENDPOINT in your .env file');
+    }
+    
+    imagekit = new ImageKit({
+      publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+      privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+      urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT
+    });
+  }
+  return imagekit;
+}
 
 async function uploadFile(file, fileName) {
-  const result = await imagekit.upload({
+  const imagekitInstance = getImageKit();
+  const result = await imagekitInstance.upload({
     file: file,       // required
     fileName: fileName // required
   });
@@ -17,7 +31,7 @@ async function uploadFile(file, fileName) {
   return result; // Returns the URL of the uploaded file
 }
 
-module.exports = {
+export default {
   uploadFile
 };
 

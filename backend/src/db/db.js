@@ -1,6 +1,6 @@
 //logic for connecting database to server (which is used in server.js)
 
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 
 
@@ -14,4 +14,4 @@ function connectDB(){
     })
 }
 
-module.exports = connectDB;
+export default connectDB;

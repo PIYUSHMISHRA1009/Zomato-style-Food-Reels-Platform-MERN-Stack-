@@ -224,6 +224,7 @@
   background: #000;
   object-fit: cover;
   max-height: 380px;
+  aspect-ratio: 4 / 5;
 }
 
 .cf-file-input {
@@ -273,6 +274,12 @@
   flex-wrap: wrap;
   gap: 10px;
   justify-content: flex-end;
+}
+
+/* Prevent header items from colliding on narrow widths */
+@media (max-width: 420px) {
+  .cf-hero { padding: 16px 12px; }
+  .cf-hero-pill { margin-top: 10px; }
 }
 
 .cf-primary,

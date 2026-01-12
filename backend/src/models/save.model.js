@@ -1,4 +1,4 @@
-const mongoose=require('mongoose');
+import mongoose from 'mongoose';
 
 const saveSchema= new mongoose.Schema({
     user:{
@@ -17,4 +17,4 @@ const saveSchema= new mongoose.Schema({
 
 const saveModel=mongoose.model('save',saveSchema);
 
-module.exports=saveModel;
+export default saveModel;
