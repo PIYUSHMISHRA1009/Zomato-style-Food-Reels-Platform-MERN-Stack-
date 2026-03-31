@@ -9,6 +9,9 @@ import Home from "../pages/general/Home";
 import Saved from "../pages/general/Saved";
 import CreateFood from "../pages/food-partner/CreateFood";
 import Profile from "../pages/food-partner/Profile";
+import like from "../models/likes.model.js";
+import Save from "../models/save.model.js";
+
 const AppRoutes = () => {
   return (
     <Router>
@@ -37,6 +40,22 @@ const AppRoutes = () => {
       </Routes>
     </Router>
   );
+};
+
+const getEngagementData = async(foodId,userId)=>{
+  const[likesCount,savesCount,isLiked,isSaved]=await Promise.all([
+    Like.countDocuments({foodId}),
+    Save.countDocuments({foodId}),
+    Like.exists({foodId,userId}),
+    Save.exists({foodId,userId})
+  ]);
+
+  return{
+    likesCount,
+    savesCount,
+    isLiked:!!isLiked,
+    isSaved:!!isSaved
+  };
 };
 
 export default AppRoutes;

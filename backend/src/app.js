@@ -9,6 +9,8 @@ import foodRoutes from './routes/food.routes.js';
 import foodPartnerRoutes from './routes/foodpartner.routes.js';
 import feedRoutes from './routes/feed.routes.js';
 import eventRoutes from './routes/event.routes.js';
+import likeRoutes from "./routes/like.routes.js"
+import saveRoutes from "./routes/save.routes.js";
 
 const app = express();
 
@@ -39,6 +41,12 @@ app.use('/api/events', eventRoutes);
 
 // personalized feed (user-aware)
 app.use('/api/feed', feedRoutes);
+
+//like toggling feature
+app.use("/api/like",likeRoutes);
+
+//save toggling feature
+app.use("/api/save",saveRoutes);
 
 export default app;
 
